@@ -9,14 +9,7 @@ export function createPluginsCommand(): Command {
     .description('Manage BSH Engine plugins');
 
   // Register all plugin commands
-  const cmds = [
-    createInstallCommand,
-  ];
-
-  for (const commandFactory of cmds) {
-    const command = commandFactory();
-    pluginsCommand.addCommand(command);
-  }
+  pluginsCommand.addCommand(createInstallCommand());
 
   return pluginsCommand;
 }

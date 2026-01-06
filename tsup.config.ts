@@ -3,19 +3,6 @@ import { defineConfig } from 'tsup';
 export default defineConfig([
   {
     entry: {
-      index: 'src/index.ts'
-    },
-    format: ['esm'],
-    dts: true,
-    sourcemap: true,
-    clean: true,
-    splitting: true,
-    treeshake: true,
-    outDir: 'dist',
-    tsconfig: './tsconfig.json',
-  },
-  {
-    entry: {
       cli: 'src/cli.ts'
     },
     format: ['esm'],
