@@ -73,14 +73,6 @@ export interface PluginWrapper {
 }
 
 /**
- * Options for installing plugins
- */
-export interface InstallOptions {
-  pluginDir?: string;
-  verbose?: boolean;
-}
-
-/**
  * Options for cleaning entities
  */
 export interface CleanOptions {

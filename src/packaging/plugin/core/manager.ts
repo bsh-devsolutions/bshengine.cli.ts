@@ -12,13 +12,13 @@ export class PluginManager {
   private discovery: PluginDiscovery;
   private parser: PluginParser;
   private dependencyCheck: PluginDependency;
-  private installer: PluginInstaller;
+  private installer?: PluginInstaller;
 
-  constructor(config: BshEngineConfig) {
+  constructor(config?: BshEngineConfig) {
     this.discovery = new PluginDiscovery();
     this.parser = new PluginParser();
     this.dependencyCheck = new PluginDependency();
-    this.installer = new PluginInstaller(config);
+    this.installer = config ? new PluginInstaller(config) : undefined;
   }
 
   async manage(request: PluginRequest): Promise<void> {
@@ -35,7 +35,7 @@ export class PluginManager {
       this.dependencyCheck.check(wrapper.contentMap);
 
       // 4. Installation: Install plugin content
-      await this.installer.install(wrapper);
+      await this.installer?.install(wrapper);
     } catch (error) {
       if (error instanceof PluginException || error instanceof Error) {
         throw error;
@@ -44,6 +44,16 @@ export class PluginManager {
         error instanceof Error ? error : new Error(String(error)),
         500
       );
+    }
+  }
+
+  async validate(request: PluginRequest): Promise<void> {
+    try {
+      const paths = await this.discovery.discover(request);
+      const wrapper = this.parser.parse(paths);
+      this.dependencyCheck.check(wrapper.contentMap);
+    } catch (error) {
+      throw error;
     }
   }
 }
