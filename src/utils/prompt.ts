@@ -77,6 +77,7 @@ export type PromptField<T = string> = {
   question: string;
   type?: 'string' | 'number' | 'integer' | 'boolean';
   defaultValue?: T;
+  ignore?: boolean;
 };
 
 /**
@@ -91,6 +92,8 @@ export async function promptMultiple(
 
   for (const field of fields) {
     let answer: any;
+
+    if (field.ignore) continue;
 
     if (field.type === 'number') answer = await promptFns.number(field.question, field.defaultValue);
     else if (field.type === 'integer') answer = await promptFns.integer(field.question, field.defaultValue);
