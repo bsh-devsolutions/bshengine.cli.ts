@@ -1,9 +1,10 @@
 import { exec } from 'child_process';
 import { promisify } from 'util';
-import { rm, rename, access } from 'fs/promises';
+import { rm, rename, access, readFile, writeFile } from 'fs/promises';
 import { join, resolve } from 'path';
 import { tmpdir } from 'os';
 import { logger } from '@src/logger';
+import { promptMultiple } from '../utils/prompt';
 
 const execAsync = promisify(exec);
 
@@ -55,7 +56,7 @@ export async function generatePlugin(
     const githubDir = join(tempDir, '.github');
     const githubExists = await directoryExists(githubDir);
     if (githubExists) {
-      logger.info('Removing .github directory...');
+      logger.info('Cleaning...');
       await rm(githubDir, { recursive: true, force: true });
     }
 
@@ -63,14 +64,18 @@ export async function generatePlugin(
     const gitDir = join(tempDir, '.git');
     const gitExists = await directoryExists(gitDir);
     if (gitExists) {
+      logger.info('Cleaning...');
       await rm(gitDir, { recursive: true, force: true });
     }
 
     // Move the cloned template to the final location
-    logger.info(`Creating plugin directory: ${finalPluginPath}`);
+    logger.info(`Generating new plugin...`);
     await rename(tempDir, finalPluginPath);
 
-    logger.success(`Plugin "${pluginName}" generated successfully at ${finalPluginPath}`);
+    logger.success(`Plugin "${pluginName}" generated at: ${finalPluginPath}`);
+    
+    // Prompt user for plugin information
+    await promptForPluginInfo(finalPluginPath, pluginName);
   } catch (error) {
     // Clean up temp directory on error
     try {
@@ -90,5 +95,66 @@ export async function generatePlugin(
       throw error;
     }
     throw new Error('Failed to generate plugin');
+  }
+}
+
+/**
+ * Check if a file exists
+ */
+async function fileExists(path: string): Promise<boolean> {
+  try {
+    await access(path);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Prompts the user for plugin information and updates bshplugin.json
+ */
+async function promptForPluginInfo(pluginPath: string, pluginName: string): Promise<void> {
+  const bshpluginJsonPath = join(pluginPath, 'bshplugin.json');
+  
+  try {
+    // Check if bshplugin.json exists
+    const fileExistsCheck = await fileExists(bshpluginJsonPath);
+    if (!fileExistsCheck) {
+      logger.warn('bshplugin.json not found, skipping plugin config update');
+      return;
+    }
+
+    // Read the current bshplugin.json
+    const currentContent = await readFile(bshpluginJsonPath, 'utf-8');
+    const pluginConfig = JSON.parse(currentContent);
+
+    logger.info('Please provide plugin information (press Enter to skip):');
+
+    // Prompt for all plugin fields
+    const userInput = await promptMultiple([
+      { name: 'id', question: `Plugin ID (${pluginName}): ` },
+      { name: 'name', question: `Plugin Name (${pluginName}): ` },
+      { name: 'description', question: 'Plugin Description: ' },
+      { name: 'author', question: 'Plugin Author: ' },
+      { name: 'version', question: 'Plugin Version (0.0.1): ' },
+      { name: 'license', question: 'License (MIT): ' },
+    ]);
+
+    // Update only fields where user provided input
+    pluginConfig.id = userInput.id || pluginName;
+    pluginConfig.name = userInput.name || pluginName;
+    pluginConfig.description = userInput.description || '';
+    pluginConfig.author = userInput.author || '';
+    pluginConfig.version = userInput.version || '0.0.1';
+    pluginConfig.license = userInput.license || 'MIT';
+    pluginConfig.image = '';
+
+    // Write the updated configuration back to file
+    await writeFile(bshpluginJsonPath, JSON.stringify(pluginConfig, null, 2) + '\n', 'utf-8');
+    
+    logger.success('Plugin information updated');
+  } catch (error) {
+    logger.warn('Failed to update plugin information:', error instanceof Error ? error.message : String(error));
+    // Don't throw - allow the plugin generation to succeed even if info update fails
   }
 }
