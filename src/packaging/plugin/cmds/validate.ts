@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import { validatePlugin } from '@plugin/api';
+import { validatePlugin } from '@plugin/api/validate';
 import { logger } from '@src/logger';
 
 export function createValidateCommand(): Command {
@@ -9,7 +9,6 @@ export function createValidateCommand(): Command {
   command
     .description('Validate a plugin without installing it to the instance')
     .argument('<plugin-dir>', 'Path to the plugin directory')
-    .option('--no-verbose', 'Disable verbose output');
 
   command.action(async (pluginDir: string) => {
     try {

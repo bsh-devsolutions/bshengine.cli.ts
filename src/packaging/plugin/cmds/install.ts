@@ -1,12 +1,11 @@
 import { Command } from 'commander';
-import { installPlugin } from '@plugin/api';
+import { installPlugin } from '@plugin/api/install';
 import type { BshEngineConfig } from '@plugin/types';
 import { logger } from '@src/logger';
 
 export type InstallCommandOptions = {
   host: string;
   apiKey: string;
-  verbose?: boolean;
 }
 
 export function getBshEngineConfig(options: InstallCommandOptions): BshEngineConfig {
@@ -26,17 +25,14 @@ export function createInstallCommand(): Command {
   command
     .description('Install a plugin from a directory')
     .argument('<plugin-dir>', 'Path to the plugin directory')
-    .option('--no-verbose', 'Disable verbose output')
     .option('-h, --host <host>', 'BSH Engine host URL')
     .option('-k, --api-key <key>', 'BSH Engine API key');
 
   command.action(async (pluginDir: string, options: InstallCommandOptions) => {
-    const { verbose = true } = options;
-
     try {
       const config = getBshEngineConfig(options);
 
-      await installPlugin(config, { pluginDir, verbose });
+      await installPlugin(config, { pluginDir });
       process.exit(0);
     } catch (error) {
       logger.error('Error:', error instanceof Error ? error.message : String(error));
