@@ -1,4 +1,5 @@
 import { createInterface, Interface } from 'readline';
+import { logger } from '@src/logger';
 
 /**
  * Creates a readline interface for prompting user input
@@ -27,8 +28,47 @@ function prompt<T = string>(
 
 async function promptString(
   question: string,
-  defaultValue?: string
+  defaultValue?: string,
+  allowedValues?: string[]
 ): Promise<string | undefined> {
+  if (allowedValues && allowedValues.length > 0) {
+    // Retry until valid value or default is used
+    while (true) {
+      const rl = createReadlineInterface();
+      const answer = await new Promise<string>((resolve) => {
+        rl.question(question, (input) => {
+          rl.close();
+          resolve(input.trim());
+        });
+      });
+
+      // If empty and default exists, use default
+      if (!answer && defaultValue !== undefined) {
+        return defaultValue;
+      }
+
+      // If empty and no default, return undefined (will be handled by caller)
+      if (!answer) {
+        return undefined;
+      }
+
+      // Check if answer is in allowed values (case-insensitive match, but return original case)
+      const normalizedAnswer = answer.toLowerCase();
+      const matchedValue = allowedValues.find(
+        (val) => val.toLowerCase() === normalizedAnswer
+      );
+
+      if (matchedValue) {
+        return matchedValue;
+      }
+
+      // Invalid value, show error and retry
+      logger.warn(
+        `Invalid value. Allowed values are: ${allowedValues.join(', ')}. Please try again.`
+      );
+    }
+  }
+
   return prompt(question, (input) => input.trim(), defaultValue);
 }
 
@@ -62,7 +102,7 @@ async function promptInteger(
   }, defaultValue);
 }
 
-export const promptFns: Record<string, (question: string, defaultValue?: any) => Promise<any>> = {
+export const promptFns: Record<string, (question: string, defaultValue?: any, allowedValues?: string[]) => Promise<any>> = {
   string: promptString,
   number: promptNumber,
   boolean: promptBoolean,
@@ -78,6 +118,7 @@ export type PromptField<T = string> = {
   type?: 'string' | 'number' | 'integer' | 'boolean';
   defaultValue?: T;
   ignore?: boolean;
+  allowedValues?: string[];
 };
 
 /**
@@ -98,7 +139,7 @@ export async function promptMultiple(
     if (field.type === 'number') answer = await promptFns.number(field.question, field.defaultValue);
     else if (field.type === 'integer') answer = await promptFns.integer(field.question, field.defaultValue);
     else if (field.type === 'boolean') answer = await promptFns.boolean(field.question, field.defaultValue);
-    else answer = await promptFns.string(field.question, field.defaultValue);
+    else answer = await promptFns.string(field.question, field.defaultValue, field.allowedValues);
 
     results[field.name] = answer;
   }
