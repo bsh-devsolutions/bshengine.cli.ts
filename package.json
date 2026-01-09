@@ -30,7 +30,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bshgenerator/bshengine.cli.ts.git"
+    "url": "git+https://github.com/bsh-devsolutions/bshengine.cli.ts.git"
   },
   "homepage": "https://engine.bousalih.com",
   "publishConfig": {

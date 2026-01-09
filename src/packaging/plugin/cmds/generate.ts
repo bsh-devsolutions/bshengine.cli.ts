@@ -2,7 +2,7 @@ import { Command } from 'commander';
 import { generatePlugin, generateManifestDirectory, generateContentFile } from '@plugin/api/generate';
 import { logger } from '@src/logger';
 
-export const TEMPLATE_REPO_URL = 'https://github.com/bshgenerator/bshengine.plugin.template.git';
+export const TEMPLATE_REPO_URL = 'https://github.com/bsh-devsolutions/bshengine.plugin.template.git';
 export const DEFAULT_PLUGIN_NAME = 'bshplugin';
 
 export function createGenerateCommand(): Command {
