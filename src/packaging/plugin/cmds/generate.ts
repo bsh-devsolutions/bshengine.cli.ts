@@ -43,7 +43,7 @@ export function createGenerateCommand(): Command {
     .alias('m')
     .description('Generate a new manifest directory')
     .argument('<name>', 'Name of the manifest directory to create')
-    .option('-t, --target <target>', 'Target Entity (dir name)')
+    .option('--target <target>', 'Target Entity (dir name)')
     .option('-d, --dependencies <dependencies>', 'Comma-separated list of additional dependencies (BshEntities is always included)')
     .option('-f, --force', 'Override existing manifest directory if it exists')
     .action(async (name: string, options: { target?: string; dependencies?: string; force?: boolean }) => {
