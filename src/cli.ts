@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url';
 // cli commands
 import { createPluginsCommand } from '@plugin/cli';
 import { createDockerCommand } from '@docker/cli';
+import { createDocsCommand } from './docs/cli';
 
 // Create CLI program with version and name 'bsh'
 const __filename = fileURLToPath(import.meta.url);
@@ -25,6 +26,7 @@ program
 // Add commands to main program
 program.addCommand(createPluginsCommand());
 program.addCommand(createDockerCommand());
+program.addCommand(createDocsCommand());
 
 program.parse();
 

@@ -3,6 +3,10 @@
 This guide explains how to manually test the CLI before publishing it to npm.
 
 ```bash
+npx tsx ./src/cli.ts [cmds] [options]
+```
+
+```bash
 # Build program
 npm run build
 
