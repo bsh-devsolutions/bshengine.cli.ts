@@ -37,7 +37,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@bshsolutions/sdk": "latest",
+    "@bshsolutions/sdk": "0.0.33",
     "commander": "^14.0.2"
   },
   "devDependencies": {
