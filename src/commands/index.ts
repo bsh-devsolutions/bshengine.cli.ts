@@ -1,6 +1,12 @@
 import type { CommandDefinition } from '@src/lib/cli/definition';
-import hello from '@commands/hello';
+import plugins from '@commands/plugins';
+import docker from '@commands/docker';
+import docs from '@commands/docs';
 
-const commands: CommandDefinition[] = [hello];
+const commands: CommandDefinition[] = [
+    plugins,
+    docker,
+    docs,
+];
 
 export default commands;
