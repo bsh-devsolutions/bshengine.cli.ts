@@ -43,6 +43,11 @@ function getBshEngineConfig(options: Options): { host: string; apiKey: string } 
   return { host, apiKey };
 }
 
+function getHistoryDetailsLink(host: string, historyId?: number | string): string | null {
+  if (historyId === undefined || historyId === null) return null;
+  return `${host.replace(/\/+$/, '')}/plugins/history/${historyId}`;
+}
+
 export default async function runInstall(
   options: Options,
   pluginDir?: string,
@@ -95,8 +100,14 @@ export default async function runInstall(
       }
     });
 
-    if (response && response.data) {
-      logger.info(JSON.stringify(response, null, 2));
+    if (response && response.data && response.data.length > 0) {
+      const installResult = response.data[0];
+      const historyLink = getHistoryDetailsLink(config.host, installResult.history);
+      logger.info(`Plugin installed: ${installResult.pluginName} (${installResult.pluginId})`);
+      logger.info(`Files: total=${installResult.totalFiles}, success=${installResult.successCount}, failed=${installResult.failedCount}`);
+      if (historyLink) {
+        logger.info(`Details: ${historyLink}`);
+      }
       process.exit(0);
     } else {
       logger.error('Failed to install plugin. No response from server.');
