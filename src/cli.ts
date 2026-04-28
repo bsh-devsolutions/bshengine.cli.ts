@@ -3,7 +3,7 @@ import { readFileSync } from 'fs';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 
-import { getConfig, loadConfig } from '@config';
+import { loadConfig } from '@config';
 import middleware from '@lib/middleware';
 import commands from '@commands';
 import cli from '@lib/cli';
@@ -24,7 +24,6 @@ program
 
 void (async () => {
   await loadConfig();
-  console.log(getConfig());
   cli(program, commands);
   await middleware(program);
 })();
