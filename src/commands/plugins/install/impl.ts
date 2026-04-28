@@ -47,6 +47,8 @@ export default async function runInstall(
   options: Options,
   pluginDir?: string,
 ): Promise<void> {
+  let tempZipPath: string | undefined;
+
   try {
     if (!pluginDir) throw new Error('Plugin directory argument is required.');
     const resolvedPluginDir = await resolvePluginDirectory(pluginDir);
@@ -60,11 +62,12 @@ export default async function runInstall(
     // 1. Zip the plugin directory
     const tempDir = tmpdir();
     await fsPromises.mkdir(tempDir, { recursive: true });
-    const zipFilename = `${randomUUID()}.zip`;
-    const tempZipPath = join(tempDir, zipFilename);
+    const zipFilename = `bshplugin-${randomUUID()}.zip`;
+    tempZipPath = join(tempDir, zipFilename);
+    const zipPath = tempZipPath;
 
     await new Promise<void>((resolve, reject) => {
-      const output = createWriteStream(tempZipPath);
+      const output = createWriteStream(zipPath);
       const archive = archiver('zip', { zlib: { level: 9 } });
 
       output.on('close', () => resolve());
@@ -78,8 +81,8 @@ export default async function runInstall(
     });
 
     // 2. Upload the zip file to the BSH Engine
-    const fileStat = await fsPromises.stat(tempZipPath);
-    const fileObj = new File([await fsPromises.readFile(tempZipPath)], zipFilename, { type: 'application/zip', lastModified: fileStat.mtimeMs });
+    const fileStat = await fsPromises.stat(zipPath);
+    const fileObj = new File([await fsPromises.readFile(zipPath)], zipFilename, { type: 'application/zip', lastModified: fileStat.mtimeMs });
 
     const engine = new BshEngine({
       host: config.host,
@@ -103,5 +106,9 @@ export default async function runInstall(
   } catch (error) {
     logger.error(error instanceof Error ? error.message : String(error));
     process.exit(1);
+  } finally {
+    if (tempZipPath) {
+      await fsPromises.rm(tempZipPath, { force: true }).catch(() => undefined);
+    }
   }
 }
