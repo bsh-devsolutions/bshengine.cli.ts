@@ -1,5 +1,5 @@
-import { existsSync, mkdirSync, readFileSync } from 'fs';
-import { dirname, join, resolve as resolvePath } from 'path';
+import { existsSync, readFileSync } from 'fs';
+import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 
 import pino, { type Logger, type LoggerOptions } from 'pino';
@@ -32,12 +32,6 @@ function readAppName(): string {
   return 'cli';
 }
 
-function resolveLogFilePath(): string | undefined {
-  const { file } = loggerConfig();
-  if (!file.enable || !file.path.trim()) return undefined;
-  return resolvePath(file.path.trim());
-}
-
 const PRETTY_BASE = {
   translateTime: false,
   ignore: 'time,pid,hostname,name,appName,level',
@@ -59,36 +53,13 @@ function createPrettyDestination(
 }
 
 function createDestination() {
-  const logFile = resolveLogFilePath();
-
   if (process.stdout.isTTY) {
     const consoleDest = createPrettyDestination(1, { colorize: true });
-    if (!logFile) return consoleDest;
-
-    const fileDest = createPrettyDestination(logFile, {
-      colorize: false,
-      mkdir: true,
-    });
-    return pino.multistream([
-      { level: level(), stream: consoleDest },
-      { level: level(), stream: fileDest },
-    ]);
+    return consoleDest;
   }
 
   const consoleDest = pino.destination({ dest: 1, sync: true, minLength: 0 });
-  if (!logFile) return consoleDest;
-
-  mkdirSync(dirname(logFile), { recursive: true });
-  const fileDest = pino.destination({
-    dest: logFile,
-    sync: true,
-    mkdir: true,
-    minLength: 0,
-  });
-  return pino.multistream([
-    { level: level(), stream: consoleDest },
-    { level: level(), stream: fileDest },
-  ]);
+  return consoleDest;
 }
 
 function serializeErr(err: Error): Record<string, unknown> {

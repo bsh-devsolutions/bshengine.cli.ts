@@ -5,6 +5,7 @@ import { join, resolve } from 'path';
 import { tmpdir } from 'os';
 import archiver from 'archiver';
 import { randomUUID } from 'crypto';
+import { getConfig } from '@config';
 
 export type Options = {
   host?: string;
@@ -34,11 +35,20 @@ async function resolvePluginDirectory(inputPath: string): Promise<string> {
 }
 
 function getBshEngineConfig(options: Options): { host: string; apiKey: string } {
-  const host = options.host;
-  const apiKey = options.apiKey;
+  const engineConfig = getConfig().engine;
+  const host = options.host ?? engineConfig.host;
+  const apiKey = options.apiKey ?? engineConfig.apiKey;
 
-  if (!host) throw new Error('Host is required. Use --host flag.');
-  if (!apiKey) throw new Error('API key is required. Use --api-key flag.');
+  if (!host) {
+    throw new Error(
+      'Host is required. Use --host flag or set `engine.host` in .bshsolutions/cli.json.',
+    );
+  }
+  if (!apiKey) {
+    throw new Error(
+      'API key is required. Use --api-key flag or set `engine.apiKey` in .bshsolutions/cli.json.',
+    );
+  }
 
   return { host, apiKey };
 }
