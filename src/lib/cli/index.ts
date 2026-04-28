@@ -27,7 +27,6 @@ export default (program: Command, commandList: CommandDefinition[]): void => {
       for (const nested of cmd.subcommands) {
         registerCommand(sub, nested);
       }
-      return;
     }
 
     if (cmd.action) {
@@ -42,6 +41,8 @@ export default (program: Command, commandList: CommandDefinition[]): void => {
       });
       return;
     }
+
+    if (cmd.subcommands?.length) return;
 
     throw new BshError(500, `Command "${cmd.name}" must define action or subcommands`);
   };

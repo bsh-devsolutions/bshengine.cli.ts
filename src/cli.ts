@@ -18,8 +18,8 @@ const packageJson = JSON.parse(
 const program = new Command();
 
 program
-  .name(`npx ${packageJson.name}`)
-  .description('CLI starter template (bsh-git style layout)')
+  .name('bsh')
+  .description('BSH Engine Manager - A CLI tool for managing BSH Engine')
   .version(packageJson.version);
 
 void (async () => {
