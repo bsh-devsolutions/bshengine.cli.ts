@@ -2,7 +2,19 @@
   "name": "@bshsolutions/cli",
   "version": "0.0.1",
   "description": "A CLI for BSH Engine <https://engine.bousalih.com>",
+  "author": "Bousalih Hamza <hamza@bousalih.com>",
+  "homepage": "https://docs.bousalih.com/docs/bsh-engine/cli",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bsh-devsolutions/bshengine.cli.ts.git"
+  },
+  "bugs": {
+    "url": "https://github.com/bsh-devsolutions/bshengine.cli.ts/issues"
+  },
   "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
   "bin": {
     "bsh": "./dist/cli.js"
   },
@@ -20,10 +32,9 @@
     "test:coverage": "vitest run --coverage"
   },
   "keywords": [
-    "bsh",
+    "bshsolutions",
     "cli",
-    "typescript",
-    "template"
+    "typescript"
   ],
   "license": "MIT",
   "dependencies": {
