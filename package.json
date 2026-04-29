@@ -11,6 +11,7 @@
   ],
   "scripts": {
     "build": "tsup && npm run commands:tree",
+    "prepublishOnly": "npm run build",
     "watch": "tsup --watch",
     "cli": "tsx src/cli.ts",
     "commands:tree": "tsx scripts/commands-tree.ts",
