@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "ES2020",
     "module": "ESNext",
-    "lib": ["ES2020", "DOM"],
+    "lib": ["ES2020"],
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
@@ -18,14 +18,15 @@
     "noEmit": false,
     "baseUrl": ".",
     "paths": {
+      "@__tests__/*": ["__tests__/*"],
       "@src/*": ["src/*"],
-      "@packaging/*": ["src/packaging/*"],
-      "@plugin/*": ["src/packaging/plugin/*"],
-      "@utils/*": ["src/utils/*"],
-      "@docker/*": ["src/docker/*"]
+      "@commands": ["src/commands/index.ts"],
+      "@commands/*": ["src/commands/*/cmd.ts"],
+      "@definition": ["src/lib/cli/definition.ts"],
+      "@config": ["src/config/index.ts"],
+      "@lib/*": ["src/lib/*"]
     }
   },
   "include": ["src/**/*", "__tests__/**/*"],
   "exclude": ["node_modules", "dist"]
 }
-

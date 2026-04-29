@@ -1,11 +1,17 @@
 import { defineConfig } from 'vitest/config';
-import tsconfigPaths from 'vite-tsconfig-paths';
 
 export default defineConfig({
-  plugins: [tsconfigPaths()],
+  resolve: {
+    tsconfigPaths: true,
+  },
+  server: {
+    host: '127.0.0.1',
+  },
   test: {
+    include: ['__tests__/**/*.test.ts'],
     globals: true,
     environment: 'node',
+    passWithNoTests: true,
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
@@ -14,9 +20,7 @@ export default defineConfig({
         'dist/',
         '**/*.d.ts',
         '**/*.config.*',
-        '**/demo/**',
       ],
     },
   },
 });
-

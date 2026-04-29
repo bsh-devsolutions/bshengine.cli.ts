@@ -1,19 +1,18 @@
 import { Command } from 'commander';
 import { readFileSync } from 'fs';
-import { join, dirname } from 'path';
+import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 
-// cli commands
-import { createPluginsCommand } from '@plugin/cli';
-import { createDockerCommand } from '@docker/cli';
-import { createDocsCommand } from './docs/cli';
+import { loadConfig } from '@config';
+import middleware from '@lib/middleware';
+import commands from '@commands';
+import cli from '@lib/cli';
 
-// Create CLI program with version and name 'bsh'
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const packageJson = JSON.parse(
-  readFileSync(join(__dirname, '../package.json'), 'utf-8')
+  readFileSync(join(__dirname, '../package.json'), 'utf-8'),
 );
 
 const program = new Command();
@@ -23,10 +22,8 @@ program
   .description('BSH Engine Manager - A CLI tool for managing BSH Engine')
   .version(packageJson.version);
 
-// Add commands to main program
-program.addCommand(createPluginsCommand());
-program.addCommand(createDockerCommand());
-program.addCommand(createDocsCommand());
-
-program.parse();
-
+void (async () => {
+  await loadConfig();
+  cli(program, commands);
+  await middleware(program);
+})();

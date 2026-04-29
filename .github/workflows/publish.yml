@@ -4,8 +4,7 @@ on:
   push:
     tags:
       - 'v*.*.*'
-      - 'v*.*.*-beta'
-      - 'v*.*.*-alpha'
+      - 'v*.*.*-*'
   workflow_dispatch:
 
 jobs:
@@ -40,19 +39,24 @@ jobs:
           echo "tag_name=$TAG_NAME"
           echo "tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
 
-          # Extract version and optional tag (v<version>[-<tag>])
-          if [[ "$TAG_NAME" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)(-(alpha|beta))?$ ]]; then
+          # Extract version and optional SemVer prerelease (v<version>[-<prerelease>])
+          # Examples:
+          #   v1.2.3           -> version=1.2.3, npm_tag=latest
+          #   v1.2.3-beta.1    -> version=1.2.3-beta.1, npm_tag=beta
+          #   v1.2.3-rc.2      -> version=1.2.3-rc.2, npm_tag=rc
+          if [[ "$TAG_NAME" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)(-([0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*))?$ ]]; then
             VERSION="${BASH_REMATCH[1]}"
-            TAG="${BASH_REMATCH[3]}"
+            PRERELEASE="${BASH_REMATCH[3]}"
           else
             echo "Tag format invalid: $TAG_NAME"
             exit 1
           fi
 
-          if [[ -z "$TAG" ]]; then
+          if [[ -z "$PRERELEASE" ]]; then
             NPM_TAG="latest"
           else
-            NPM_TAG="$TAG"
+            # Use the first prerelease identifier as npm dist-tag (e.g. beta from beta.1)
+            NPM_TAG="${PRERELEASE%%.*}"
           fi
 
           if [ "$NPM_TAG" = "latest" ]; then
@@ -61,9 +65,9 @@ jobs:
             echo "version=$VERSION"
             echo "npm_tag=latest"
           else
-            echo "version=$VERSION-$NPM_TAG" >> $GITHUB_OUTPUT
+            echo "version=$VERSION-$PRERELEASE" >> $GITHUB_OUTPUT
             echo "npm_tag=$NPM_TAG" >> $GITHUB_OUTPUT
-            echo "version=$VERSION-$NPM_TAG"
+            echo "version=$VERSION-$PRERELEASE"
             echo "npm_tag=$NPM_TAG"
           fi
         
